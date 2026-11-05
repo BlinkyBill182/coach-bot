@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.db
+*.db-*
+credentials.json
+google_token.json
+bot/seed/
+.claude/settings.local.json

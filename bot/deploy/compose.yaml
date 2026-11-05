@@ -1,0 +1,25 @@
+# /docker/coach/compose.yaml on the server (Hostinger Docker Manager lists projects in /docker).
+# Traefik runs with host networking and reaches this container on the project's default network.
+name: coach
+services:
+  coach:
+    build:
+      context: ./src
+      dockerfile: bot/deploy/Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 90s  # let a reply in progress finish before a deploy restarts the bot
+    env_file: .env
+    # The server's own name resolves to 127.0.1.1 inside containers; send it to the host, where Traefik
+    # listens, so ETA_URL (https://<this server>/waze) works from the bot.
+    extra_hosts:
+      - "${DOMAIN}:host-gateway"
+    volumes:
+      - ./data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coach_default
+      - traefik.http.routers.coach.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.coach.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.coach.tls=true
+      - traefik.http.routers.coach.tls.certresolver=${TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.coach.loadbalancer.server.port=8080

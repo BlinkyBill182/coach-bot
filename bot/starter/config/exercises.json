@@ -1,0 +1,386 @@
+{
+ "items": [
+  {
+   "days": [
+    1,
+    5
+   ],
+   "hi": 8,
+   "id": "chestpress",
+   "lo": 6,
+   "muscle": "chest",
+   "name": "לחיצת חזה",
+   "sets": 3
+  },
+  {
+   "days": [
+    1,
+    5
+   ],
+   "hi": 12,
+   "id": "inclinepress",
+   "lo": 8,
+   "muscle": "chest",
+   "name": "לחיצת חזה עליון",
+   "sets": 3
+  },
+  {
+   "days": [],
+   "hi": 15,
+   "id": "fly",
+   "lo": 10,
+   "muscle": "chest",
+   "name": "פרפר או קרוס אובר",
+   "sets": 3
+  },
+  {
+   "days": [
+    2,
+    5
+   ],
+   "hi": 8,
+   "id": "pulldown",
+   "lo": 6,
+   "muscle": "back",
+   "name": "פולי עליון",
+   "sets": 3
+  },
+  {
+   "days": [
+    2,
+    5
+   ],
+   "hi": 12,
+   "id": "machinerow",
+   "lo": 8,
+   "muscle": "back",
+   "name": "חתירה במכונה",
+   "sets": 3
+  },
+  {
+   "days": [
+    1,
+    2,
+    5
+   ],
+   "hi": 15,
+   "id": "lateral",
+   "lo": 10,
+   "muscle": "shoulders",
+   "name": "הרחקה לצדדים",
+   "sets": 3
+  },
+  {
+   "days": [],
+   "hi": 15,
+   "id": "frontraise",
+   "lo": 10,
+   "muscle": "shoulders",
+   "name": "הרמה קדמית",
+   "sets": 3
+  },
+  {
+   "days": [
+    2
+   ],
+   "hi": 15,
+   "id": "sidebend",
+   "lo": 10,
+   "max": 24,
+   "muscle": "abs",
+   "name": "כפיפות צד",
+   "sets": 3
+  },
+  {
+   "days": [
+    1
+   ],
+   "hi": 15,
+   "id": "triceps",
+   "lo": 10,
+   "muscle": "triceps",
+   "name": "יד אחורית",
+   "sets": 3
+  },
+  {
+   "days": [
+    2,
+    5
+   ],
+   "hi": 12,
+   "id": "biceps",
+   "lo": 8,
+   "muscle": "biceps",
+   "name": "יד קדמית",
+   "sets": 3
+  },
+  {
+   "days": [
+    3,
+    6
+   ],
+   "hi": 15,
+   "id": "legext",
+   "lo": 12,
+   "muscle": "quads",
+   "name": "פשיטת ברכיים",
+   "sets": 3
+  },
+  {
+   "days": [
+    3,
+    6
+   ],
+   "hi": 15,
+   "id": "legcurl",
+   "lo": 10,
+   "muscle": "hamstrings",
+   "name": "כפיפת ברכיים",
+   "sets": 3
+  },
+  {
+   "days": [
+    3,
+    6
+   ],
+   "hi": 12,
+   "id": "legpress",
+   "lo": 8,
+   "muscle": "quads",
+   "name": "דחיקת רגליים",
+   "sets": 3
+  },
+  {
+   "days": [
+    3
+   ],
+   "hi": 20,
+   "id": "seatedcalf",
+   "lo": 12,
+   "muscle": "calves",
+   "name": "תאומים בישיבה",
+   "sets": 3
+  },
+  {
+   "days": [],
+   "hi": 8,
+   "id": "tbarlats",
+   "lo": 6,
+   "muscle": "back",
+   "name": "משיכת T-bar לגב עליון ולטים",
+   "sets": 3
+  },
+  {
+   "days": [],
+   "hi": 12,
+   "id": "tbarrow",
+   "lo": 8,
+   "muscle": "back",
+   "name": "חתירת T-bar",
+   "sets": 3
+  },
+  {
+   "days": [],
+   "hi": 8,
+   "id": "shoulderpress",
+   "lo": 6,
+   "muscle": "shoulders",
+   "name": "לחיצת כתפיים",
+   "sets": 3
+  },
+  {
+   "days": [
+    2
+   ],
+   "hi": 15,
+   "id": "reardelt",
+   "lo": 12,
+   "muscle": "shoulders",
+   "name": "הרחקה אחורית בישיבה כפופה",
+   "sets": 3
+  },
+  {
+   "days": [
+    3,
+    6
+   ],
+   "hi": 20,
+   "id": "standingcalf",
+   "lo": 12,
+   "muscle": "calves",
+   "name": "תאומים בעמידה",
+   "sets": 3
+  },
+  {
+   "days": [
+    1,
+    5
+   ],
+   "hi": 15,
+   "id": "overheadtri",
+   "lo": 10,
+   "muscle": "triceps",
+   "name": "יד אחורית מעל הראש",
+   "sets": 3
+  },
+  {
+   "days": [
+    1,
+    5
+   ],
+   "hi": 15,
+   "id": "cablecrunch",
+   "lo": 10,
+   "muscle": "abs",
+   "name": "כפיפות בטן בכבל",
+   "sets": 3
+  },
+  {
+   "days": [
+    6
+   ],
+   "hi": 12,
+   "id": "rdl",
+   "lo": 8,
+   "muscle": "hamstrings",
+   "name": "דדליפט רומני",
+   "sets": 3
+  },
+  {
+   "days": [
+    2
+   ],
+   "hi": 12,
+   "id": "inclinecurl",
+   "lo": 8,
+   "muscle": "biceps",
+   "name": "כפיפת מרפקים בשיפוע",
+   "sets": 3
+  }
+ ],
+ "plans": {
+  "1": [
+   {
+    "name": "לחיצת חזה",
+    "ss": "A"
+   },
+   {
+    "name": "הרחקה לצדדים",
+    "ss": "A"
+   },
+   {
+    "name": "לחיצת חזה עליון",
+    "ss": "B"
+   },
+   {
+    "name": "יד אחורית מעל הראש",
+    "ss": "B"
+   },
+   {
+    "name": "יד אחורית",
+    "ss": "C"
+   },
+   {
+    "name": "כפיפות בטן בכבל",
+    "ss": "C"
+   }
+  ],
+  "2": [
+   {
+    "name": "פולי עליון",
+    "ss": "A"
+   },
+   {
+    "name": "הרחקה לצדדים",
+    "ss": "A"
+   },
+   {
+    "name": "חתירה במכונה",
+    "ss": "B"
+   },
+   {
+    "name": "הרחקה אחורית בישיבה כפופה",
+    "ss": "B"
+   },
+   {
+    "name": "יד קדמית",
+    "ss": "C"
+   },
+   {
+    "name": "כפיפות צד",
+    "ss": "C"
+   },
+   {
+    "name": "כפיפת מרפקים בשיפוע"
+   }
+  ],
+  "3": [
+   {
+    "name": "דחיקת רגליים"
+   },
+   {
+    "name": "פשיטת ברכיים"
+   },
+   {
+    "name": "כפיפת ברכיים"
+   },
+   {
+    "name": "תאומים בעמידה"
+   },
+   {
+    "name": "תאומים בישיבה"
+   }
+  ],
+  "5": [
+   {
+    "name": "לחיצת חזה",
+    "ss": "A"
+   },
+   {
+    "name": "פולי עליון",
+    "ss": "A"
+   },
+   {
+    "name": "לחיצת חזה עליון",
+    "ss": "B"
+   },
+   {
+    "name": "חתירה במכונה",
+    "ss": "B"
+   },
+   {
+    "name": "הרחקה לצדדים",
+    "ss": "C"
+   },
+   {
+    "name": "כפיפות בטן בכבל",
+    "ss": "C"
+   },
+   {
+    "name": "יד אחורית מעל הראש",
+    "ss": "D"
+   },
+   {
+    "name": "יד קדמית",
+    "ss": "D"
+   }
+  ],
+  "6": [
+   {
+    "name": "דדליפט רומני"
+   },
+   {
+    "name": "כפיפת ברכיים"
+   },
+   {
+    "name": "דחיקת רגליים"
+   },
+   {
+    "name": "פשיטת ברכיים"
+   },
+   {
+    "name": "תאומים בעמידה"
+   }
+  ]
+ }
+}

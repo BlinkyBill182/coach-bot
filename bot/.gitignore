@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.db
+.env
+credentials.json
+google_token.json
+seed/

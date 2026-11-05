@@ -1,0 +1,194 @@
+{
+ "city": "example-area",
+ "sections": [
+  {
+   "template": "venue-vertical-list",
+   "items": [
+    {
+     "venue": {
+      "name": "Place 1",
+      "slug": "place-1",
+      "online": true,
+      "delivers": true,
+      "estimate": 30,
+      "estimate_range": "25-35",
+      "rating": {
+       "rating": 3,
+       "score": 8.0,
+       "volume": 1974
+      },
+      "price_range": 2,
+      "tags": [
+       "japanese",
+       "noodles",
+       "rice"
+      ],
+      "short_description": "House of Asian Food",
+      "address": "רחוב לדוגמה 1"
+     }
+    },
+    {
+     "venue": {
+      "name": "Place 2",
+      "slug": "place-2",
+      "online": true,
+      "delivers": true,
+      "estimate": 25,
+      "estimate_range": "20-30",
+      "rating": {
+       "rating": 3,
+       "score": 9.0,
+       "volume": 1068
+      },
+      "price_range": 2,
+      "tags": [
+       "hamburger",
+       "sandwich",
+       "street food"
+      ],
+      "short_description": "Local Burger Shop",
+      "address": "רחוב לדוגמה 2"
+     }
+    },
+    {
+     "venue": {
+      "name": "Place 3",
+      "slug": "place-3",
+      "online": true,
+      "delivers": true,
+      "estimate": 15,
+      "estimate_range": "10-20",
+      "rating": {
+       "rating": 3,
+       "score": 8.0,
+       "volume": 749
+      },
+      "price_range": 2,
+      "tags": [
+       "bbq",
+       "street food",
+       "sandwich"
+      ],
+      "short_description": "For Meat Lovers",
+      "address": "רחוב לדוגמה 3"
+     }
+    },
+    {
+     "venue": {
+      "name": "Place 4",
+      "slug": "place-4",
+      "online": true,
+      "delivers": true,
+      "estimate": 25,
+      "estimate_range": "20-30",
+      "rating": {
+       "rating": 3,
+       "score": 8.2,
+       "volume": 951
+      },
+      "price_range": 2,
+      "tags": [
+       "hamburger",
+       "sandwich",
+       "street food"
+      ],
+      "short_description": "Premium Burger - Kosher",
+      "address": "רחוב לדוגמה 4"
+     }
+    },
+    {
+     "venue": {
+      "name": "Place 5",
+      "slug": "place-5",
+      "online": true,
+      "delivers": true,
+      "estimate": 20,
+      "estimate_range": "15-25",
+      "rating": {
+       "rating": 3,
+       "score": 8.6,
+       "volume": 427
+      },
+      "price_range": 2,
+      "tags": [
+       "ice cream",
+       "dessert",
+       "kosher"
+      ],
+      "short_description": "Golda Ice Cream - Flavor Boutique",
+      "address": "רחוב לדוגמה 5"
+     }
+    },
+    {
+     "venue": {
+      "name": "Place 6",
+      "slug": "place-6",
+      "online": true,
+      "delivers": true,
+      "estimate": 30,
+      "estimate_range": "25-35",
+      "rating": {
+       "rating": 3,
+       "score": 8.4,
+       "volume": 351
+      },
+      "price_range": 2,
+      "tags": [
+       "burger",
+       "kosher",
+       "salad"
+      ],
+      "short_description": "Much More Than Hamburger | Kosher Mahfud Badatz",
+      "address": "רחוב לדוגמה 6"
+     }
+    },
+    {
+     "venue": {
+      "name": "Sushi Place 7",
+      "slug": "place-7",
+      "online": true,
+      "delivers": true,
+      "estimate": 40,
+      "estimate_range": "35-45",
+      "rating": {
+       "rating": 3,
+       "score": 8.6,
+       "volume": 687
+      },
+      "price_range": 2,
+      "tags": [
+       "asian",
+       "noodles",
+       "sushi"
+      ],
+      "short_description": "Noodles & Sushi | Kosher",
+      "address": "רחוב לדוגמה 7"
+     }
+    },
+    {
+     "venue": {
+      "name": "Sushi Place 8",
+      "slug": "place-8",
+      "online": true,
+      "delivers": true,
+      "estimate": 25,
+      "estimate_range": "20-30",
+      "rating": {
+       "rating": 3,
+       "score": 8.8,
+       "volume": 730
+      },
+      "price_range": 2,
+      "tags": [
+       "asian",
+       "fish",
+       "kosher"
+      ],
+      "short_description": "Sushi, stir-fries, buns, and snacks | Kosher",
+      "address": "רחוב לדוגמה 8"
+     }
+    }
+   ]
+  }
+ ]
+}

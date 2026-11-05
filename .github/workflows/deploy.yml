@@ -1,0 +1,54 @@
+# Push to main -> run the bot's tests -> deploy to the VPS with bot/deploy/deploy.sh.
+# Lets you ship a change without your computer. Until the secrets are set, the deploy step is skipped with a warning.
+# Secrets (set once with bot/deploy/setup-github-deploy.sh): VPS_SSH_KEY, VPS_KNOWN_HOSTS, VPS_HOST.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bot/**"
+      - ".claude/skills/muscle-coach/**"
+      - "tracker.html"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r bot/requirements.txt pytest
+      - run: python -m pytest -q bot/tests
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SSH key for the VPS
+        id: key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$VPS_SSH_KEY" ]; then
+            echo "::warning::Not deployed: VPS_SSH_KEY is not set yet. Run bot/deploy/setup-github-deploy.sh once on your computer."
+            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Deploy
+        if: steps.key.outputs.ready == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: bash bot/deploy/deploy.sh "$VPS_HOST"

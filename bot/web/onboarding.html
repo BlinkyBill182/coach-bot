@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>שאלון פתיחה</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* The questionnaire as a page inside Telegram. One question per screen, phone first; same tokens as tracker.html. */
+:root{
+  --bg:#EDF1F3; --surface:#FFFFFF; --ink:#13232E; --muted:#586976; --line:#D6DEE3; --track:#E3E9ED;
+  --accent:#0B6E8A; --accent-ink:#FFFFFF; --accent-soft:#DCEEF3;
+  --good:#2F7D4B; --good-soft:#DDF0E3; --warn:#9A4A06; --warn-soft:#FBE9D2;
+  --font-body:'Heebo',system-ui,'Segoe UI',Arial,sans-serif;
+  --font-num:'Rubik','Heebo',system-ui,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A21; --surface:#16262F; --ink:#E7EFF3; --muted:#94A6B2; --line:#2A3D49; --track:#243642;
+    --accent:#4DB6D3; --accent-ink:#06222B; --accent-soft:#17414E;
+    --good:#78C592; --good-soft:#1B3A29; --warn:#F0B26B; --warn-soft:#41290F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A21; --surface:#16262F; --ink:#E7EFF3; --muted:#94A6B2; --line:#2A3D49; --track:#243642;
+  --accent:#4DB6D3; --accent-ink:#06222B; --accent-soft:#17414E;
+  --good:#78C592; --good-soft:#1B3A29; --warn:#F0B26B; --warn-soft:#41290F;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg)}
+body{color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5;direction:rtl;-webkit-text-size-adjust:100%}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shell{min-height:100vh;min-height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.top{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 12px;margin-bottom:22px}
+.count{font-size:13px;color:var(--muted);font-family:var(--font-num);grid-column:2;justify-self:end}
+.back{grid-column:1;border:0;background:transparent;color:var(--muted);font-size:14px;padding:6px 0;min-height:32px}
+.bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--accent);border-radius:3px}
+.screen{flex:1;min-width:0;padding-bottom:16px}
+h1{font-family:var(--font-num);font-weight:700;font-size:24px;line-height:1.2;margin:0 0 8px;text-wrap:balance;outline:none}
+h2{font-family:var(--font-num);font-weight:500;font-size:15px;margin:0 0 8px}
+.hint{color:var(--muted);margin:0 0 18px;font-size:15px}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+/* options */
+.opts{display:grid;gap:10px}
+.opt{display:block;width:100%;text-align:right;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:15px 16px;min-height:60px}
+.opt b{display:block;font-weight:500;font-size:17px}
+.opt span{display:block;color:var(--muted);font-size:14px;margin-top:1px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;direction:ltr}
+.chip{height:64px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;font-family:var(--font-num);font-size:22px;font-weight:500}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+/* fields */
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.field{display:block;min-width:0}
+.field span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;white-space:nowrap}
+.field input{width:100%;height:56px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;font-family:var(--font-num);font-size:20px;text-align:center;padding:0 4px;direction:ltr}
+.field input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{display:block;width:100%;min-height:136px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;resize:vertical;line-height:1.45}
+/* photo */
+.sr{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.drop{display:block;text-align:center;background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:22px 16px;cursor:pointer}
+.drop:focus-within{border-color:var(--accent)}
+.drop b{display:block;font-weight:500;font-size:17px;color:var(--accent)}
+.drop span{display:block;color:var(--muted);font-size:14px}
+.points{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:7px;font-size:14px;color:var(--muted)}
+.points li{padding-right:14px;position:relative}
+.points li::before{content:"";position:absolute;right:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--line)}
+.status{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--track);border-top-color:var(--accent);flex:none}
+.note{background:var(--good-soft);border-radius:14px;padding:14px 16px}
+.note h2{margin-bottom:3px}
+.note p{margin:0}
+.row-links{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px}
+/* review */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 16px;margin-bottom:14px}
+.card.pad{padding:14px 16px}
+.line{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:start;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid var(--line);padding:11px 0}
+.line:last-child{border-bottom:0}
+.line small{display:block;color:var(--muted);font-size:13px}
+.line em{font-style:normal;color:var(--accent);font-size:13px;align-self:center}
+.compare{display:grid;grid-template-columns:1fr auto auto;gap:8px 18px;align-items:baseline;margin:10px 0 2px}
+.compare .h{color:var(--muted);font-size:13px}
+.compare .c{text-align:center}
+.compare .v{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:center;direction:ltr}
+.compare .v.new{font-weight:700}
+.macros{color:var(--muted);font-size:13px;margin:10px 0 0}
+.verdict{border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:15px}
+.verdict.keep{background:var(--good-soft)}
+.verdict.change{background:var(--warn-soft)}
+.prose{white-space:pre-line;margin:0 0 18px}
+/* footer */
+.foot{position:sticky;bottom:0;display:grid;gap:4px;background:var(--bg);padding:10px 0 max(14px,env(safe-area-inset-bottom,0px))}
+.foot:empty{display:none}
+.primary{height:52px;width:100%;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:500;font-size:17px;padding:0 12px}
+.second{height:52px;width:100%;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:500;padding:0 12px}
+.link{border:0;background:transparent;color:var(--muted);text-decoration:underline;font-size:14px;min-height:44px;padding:6px 10px}
+.link.tight{min-height:32px;padding:4px 0}
+button:disabled{opacity:.55;cursor:default}
+.err{color:var(--warn);background:var(--warn-soft);border-radius:10px;padding:9px 12px;margin:0 0 8px;font-size:14px}
+@media (prefers-reduced-motion: no-preference){
+  .spin{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top" id="top" hidden>
+    <button class="back" id="back" type="button">→ חזרה</button>
+    <div class="count" id="count"></div>
+    <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-label="התקדמות"><span id="fill"></span></div>
+  </header>
+  <main class="screen" id="screen"></main>
+  <footer class="foot" id="foot"></footer>
+</div>
+<script>
+(function () {
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var key = new URLSearchParams(location.search).get("key") || "";
+  var inTelegram = !!(tg && tg.initData);
+  var hasBackButton = inTelegram && tg.isVersionAtLeast && tg.isVersionAtLeast("6.1");
+  if (tg) {
+    try {
+      tg.ready();
+      tg.expand();
+      var setTheme = function () { document.documentElement.setAttribute("data-theme", tg.colorScheme === "dark" ? "dark" : "light"); };
+      if (inTelegram) { setTheme(); tg.onEvent("themeChanged", setTheme); }
+      if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+      if (hasBackButton) tg.BackButton.onClick(back);
+    } catch (e) {}
+  }
+
+  var QUESTIONS = ["body", "sex", "photo", "goal", "job", "activity", "gym", "avoid", "pantry"];
+  var INTRO = -1, REVIEW = QUESTIONS.length, DONE = QUESTIONS.length + 1;
+  var S = { i: INTRO, draft: {}, saved: false, lastWeight: null, review: null, busy: false, error: "", photo: "idle", doneText: "" };
+
+  var screen = document.getElementById("screen"), foot = document.getElementById("foot"), top_ = document.getElementById("top");
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fmt(n) { return Number(n).toLocaleString("en-US"); }
+  function round10(n) { return Math.round(n / 10) * 10; }
+
+  function api(method, path, body, raw) {
+    var h = {};
+    if (tg && tg.initData) h["X-Telegram-Init-Data"] = tg.initData;
+    if (key) h["X-Access-Key"] = key;
+    var init = { method: method, headers: h };
+    if (raw) { h["Content-Type"] = "image/jpeg"; init.body = raw; }
+    else if (body !== undefined) { h["Content-Type"] = "application/json"; init.body = JSON.stringify(body); }
+    return fetch("/api/onboarding" + path, init).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) { var e = new Error(j.message || "HTTP " + r.status); e.status = r.status; e.step = j.step; e.code = j.code; throw e; }
+        return j;
+      });
+    }, function () { var e = new Error("אין חיבור כרגע. נסה שוב."); e.status = 0; throw e; });
+  }
+
+  /* ---------- moving ---------- */
+  function go(i) {
+    S.i = i;
+    S.error = "";
+    if (i === REVIEW) { loadReview(); return; }
+    render();
+  }
+  /* A question opened from the summary goes back to the summary, not on to the next question. */
+  function next() {
+    if (S.fromReview) { S.fromReview = false; go(REVIEW); return; }
+    go(S.i + 1);
+  }
+  function back() {
+    if (S.busy) return;
+    if (S.fromReview) { S.fromReview = false; go(REVIEW); return; }
+    if (S.i > INTRO && S.i <= REVIEW) go(S.i - 1);
+  }
+  function fail(e) {
+    S.busy = false;
+    S.error = e.status === 403 ? "צריך לפתוח את השאלון מהכפתור בבוט בטלגרם." : e.message;
+    if (e.step && QUESTIONS.indexOf(e.step) >= 0 && QUESTIONS.indexOf(e.step) !== S.i) {
+      S.i = QUESTIONS.indexOf(e.step);  // another question needs an answer: go there
+      render();
+      return;
+    }
+    foot.innerHTML = SCREENS[S.i === REVIEW ? "review" : S.i === INTRO ? "intro" : QUESTIONS[S.i]]().foot;  // same screen: keep what he typed
+  }
+  function save(changes, then) {
+    if (S.busy) return;
+    S.busy = true;
+    api("PUT", "/draft", changes).then(function (j) {
+      S.busy = false;
+      S.draft = j.draft;
+      S.error = "";
+      (then || next)();
+    }).catch(fail);
+  }
+  function loadReview() {
+    S.busy = true;
+    S.review = null;
+    render();
+    api("POST", "/review", {}).then(function (j) {
+      S.busy = false;
+      S.review = j;
+      render();
+    }).catch(fail);
+  }
+  function finish(apply) {
+    if (S.busy) return;
+    S.busy = true;
+    S.error = "";
+    render();
+    api("POST", "/finish", { apply: apply }).then(function (j) {
+      S.busy = false;
+      S.doneText = j.text;
+      go(DONE);
+    }).catch(function (e) {
+      S.busy = false;
+      if (e.status === 409) { S.error = "היעדים השתנו מאז שהוצגו. בדוק אותם ואשר שוב."; }
+      else if (e.step) { fail(e); return; }
+      else { S.error = e.message; }
+      render();
+    });
+  }
+  function leave() {
+    if (S.busy) return;
+    S.busy = true;
+    api("POST", "/discard", {}).then(function () {
+      S.busy = false;
+      if (inTelegram) { tg.close(); return; }
+      S.draft = {};
+      S.doneText = "יצאתי בלי לשמור.";
+      go(DONE);
+    }).catch(fail);
+  }
+
+  /* ---------- screens ---------- */
+  function errBlock() { return S.error ? '<p class="err" role="alert">' + esc(S.error) + "</p>" : ""; }
+  function opt(field, value, label, sub) {
+    return '<button type="button" class="opt" data-field="' + field + '" data-value="' + value + '" aria-pressed="' + (S.draft[field] === value) + '"><b>' + esc(label) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "") + "</button>";
+  }
+  function textStep(field, title, hint) {
+    return { body: "<h1 tabindex=\"-1\">" + title + '</h1><p class="hint" id="h-' + field + '">' + hint + '</p><textarea id="f-text" maxlength="500" aria-labelledby="h-' + field + '">' + esc(S.draft[field] || "") + "</textarea>",
+             foot: errBlock() + '<button type="button" class="primary" data-act="text" data-field="' + field + '">המשך</button><button type="button" class="link" data-act="skip" data-field="' + field + '">דלג</button>' };
+  }
+
+  var SCREENS = {
+    intro: function () {
+      var going = !S.saved && Object.keys(S.draft).length > 0;
+      var hint = S.saved ? "כבר מילאת אותו. התשובות שלך כבר בפנים, אז אפשר לעדכן רק מה שהשתנה."
+        : going ? "התשובות שכבר נתת שמורות, וממשיכים מאיפה שעצרת."
+        : "9 שאלות קצרות. מהתשובות אני מעריך כמה אתה שורף ביום ובונה את הבסיס שלי עליך.";
+      return { body: '<h1 tabindex="-1">שאלון פתיחה</h1><p class="hint">' + hint + '</p><ul class="points"><li>אפשר לדלג על מה שלא חובה, ולחזור אחורה בכל שלב.</li><li>שום יעד לא משתנה בלי אישור שלך.</li><li>אפשר לסגור באמצע: התשובות נשמרות, ונכנסות לתוקף רק כשתאשר בסוף.</li></ul>',
+               foot: errBlock() + '<button type="button" class="primary" data-act="start">' + (going || S.saved ? "להמשיך" : "מתחילים") + "</button>" };
+    },
+    body: function () {
+      var d = S.draft, w = d.weight != null ? d.weight : S.lastWeight;
+      var note = d.weight == null && S.lastWeight != null ? '<p class="hint" style="margin-top:10px">המשקל הוא האחרון שרשמת. אפשר לשנות.</p>' : "";
+      return { body: '<h1 tabindex="-1">גיל, משקל וגובה</h1><p class="hint">מכאן מתחיל החישוב, אז זו שאלה שצריך לענות עליה.</p><div class="fields">'
+          + '<label class="field"><span>גיל</span><input id="f-age" inputmode="numeric" autocomplete="off" value="' + esc(d.age != null ? d.age : "") + '"></label>'
+          + '<label class="field"><span>משקל, ק״ג</span><input id="f-weight" inputmode="decimal" autocomplete="off" value="' + esc(w != null ? w : "") + '"></label>'
+          + '<label class="field"><span>גובה, ס״מ</span><input id="f-height" inputmode="numeric" autocomplete="off" value="' + esc(d.height != null ? d.height : "") + '"></label>'
+          + "</div>" + note,
+        foot: errBlock() + '<button type="button" class="primary" data-act="body">המשך</button>' };
+    },
+    sex: function () {
+      return { body: '<h1 tabindex="-1">מין</h1><p class="hint">נוסחת הקלוריות משתנה לפיו.</p><div class="opts">' + opt("sex", "m", "גבר") + opt("sex", "f", "אישה") + "</div>", foot: errBlock() };
+    },
+    photo: function () {
+      var privacy = '<ul class="points"><li>התמונה עוברת ישירות לניתוח חד-פעמי ב-Claude, ולא נכנסת לצ׳אט.</li>'
+        + "<li>אצלי היא לא נשמרת: לא בדיסק, לא במסד ולא בגיבוי. נשאר רק תיאור קצר במילים.</li>"
+        + "<li>ב-Anthropic, לפי המדיניות שלהם, קלט של ה-API נמחק תוך 30 יום, ואם מערכת הבטיחות שלהם מסמנת אותו הוא נשמר עד שנתיים.</li>"
+        + "<li>אני לא מעריך ממנה אחוז שומן, והיא לא נכנסת לחישוב הקלוריות.</li></ul>";
+      var picker = '<label class="drop"><input class="sr" id="f-photo" type="file" accept="image/*"><b>בחירת תמונה</b><span>מהמצלמה או מהגלריה</span></label>';
+      if (S.photo === "busy") {
+        return { body: '<h1 tabindex="-1">תמונת גוף</h1><div class="status" role="status"><span class="spin" aria-hidden="true"></span>מנתח את התמונה…</div>', foot: "" };
+      }
+      if (S.draft.build) {
+        return { body: '<h1 tabindex="-1">תמונת גוף</h1><div class="note"><h2>מה שנשאר אצלי</h2><p>' + esc(S.draft.build) + '</p></div><div class="row-links"><label class="link tight" style="cursor:pointer"><input class="sr" id="f-photo" type="file" accept="image/*">תמונה אחרת</label><button type="button" class="link tight" data-act="clear-build">למחוק את התיאור</button></div>' + privacy,
+                 foot: errBlock() + '<button type="button" class="primary" data-act="next">המשך</button>' };
+      }
+      return { body: '<h1 tabindex="-1">תמונת גוף</h1><p class="hint">לא חובה. כדי שאראה את המבנה שלך. בלבוש שמראה מבנה, למשל מכנס קצר, בלי עירום.</p>' + picker + privacy,
+               foot: errBlock() + '<button type="button" class="link" data-act="next">דלג</button>' };
+    },
+    goal: function () {
+      return { body: '<h1 tabindex="-1">מה המטרה?</h1><p class="hint">לפי זה נקבע היעד היומי.</p><div class="opts">' + opt("goal", "lose", "ירידה במשקל") + opt("goal", "keep", "שמירה על כושר") + opt("goal", "gain", "עלייה במסת שריר") + "</div>", foot: errBlock() };
+    },
+    job: function () { return textStep("job", "מה אתה עושה בחיים?", "עבודה ושגרה, במשפט."); },
+    activity: function () {
+      return { body: '<h1 tabindex="-1">איך נראה יום רגיל, בלי חדר הכושר?</h1><p class="hint">מכאן מגיעה הערכת ההוצאה היומית.</p><div class="opts">' + opt("activity", "sit", "בעיקר יושב") + opt("activity", "mixed", "חצי-חצי", "חלק מהיום על הרגליים") + opt("activity", "active", "על הרגליים", "או עבודה פיזית") + "</div>", foot: errBlock() };
+    },
+    gym: function () {
+      var h = "";
+      for (var n = 0; n <= 7; n++) h += '<button type="button" class="chip" data-field="gym" data-value="' + n + '" aria-pressed="' + (S.draft.gym === n) + '">' + n + "</button>";
+      return { body: '<h1 tabindex="-1">כמה פעמים בשבוע חדר כושר?</h1><p class="hint">מספר האימונים שאתה עושה בפועל.</p><div class="chips">' + h + "</div>", foot: errBlock() };
+    },
+    avoid: function () { return textStep("avoid", "מה חשוב שאדע?", "מאכלים שאתה לא אוכל, העדפות, רגישויות, מגבלות."); },
+    pantry: function () { return textStep("pantry", "מה תמיד יש בבית?", "ואיזה תוספים זמינים לך."); },
+    review: function () {
+      if (!S.review) {
+        return { body: '<h1 tabindex="-1">סיכום</h1><div class="status" role="status"><span class="spin" aria-hidden="true"></span>מחשב…</div>', foot: errBlock() };
+      }
+      var d = S.draft, r = S.review, e = r.estimate, gap = (r.gap * 100).toFixed(1);
+      var SEX = { m: "גבר", f: "אישה" }, GOAL = { lose: "ירידה במשקל", keep: "שמירה על כושר", gain: "עלייה במסת שריר" }, ACT = { sit: "בעיקר יושב", mixed: "חצי-חצי", active: "על הרגליים או עבודה פיזית" };
+      function line(step, label, value) {
+        return '<button type="button" class="line" data-go="' + QUESTIONS.indexOf(step) + '"><span><small>' + label + "</small>" + esc(value) + "</span><em>שינוי</em></button>";
+      }
+      var rows = line("body", "גיל, משקל וגובה", d.age + " · " + d.weight + " ק״ג · " + d.height + " ס״מ")
+        + line("sex", "מין", SEX[d.sex])
+        + line("photo", "תיאור המבנה", d.build || "בלי תמונה")
+        + line("goal", "מטרה", GOAL[d.goal])
+        + line("job", "עיסוק", d.job || "דילגת")
+        + line("activity", "יום רגיל", ACT[d.activity])
+        + line("gym", "חדר כושר", d.gym + " בשבוע")
+        + line("avoid", "לא אוכל והעדפות", d.avoid || "דילגת")
+        + line("pantry", "תמיד בבית ותוספים", d.pantry || "דילגת");
+      var t = e.targets, l = r.live;
+      var estimate = '<div class="card pad"><h2>ההערכה</h2><p class="hint" style="margin:0">הוצאה בסיסית <span class="num">' + fmt(e.bmr) + "</span> קק״ל. ביום מנוחה בערך <span class=\"num\">" + fmt(round10(e.burn.rest)) + "</span>, וביום אימון בערך <span class=\"num\">" + fmt(round10(e.burn.train)) + "</span>. זו נוסחה, עם טעות של בערך 10%.</p>"
+        + '<div class="compare"><span class="h">קק״ל ליום</span><span class="h c">לפי הנוסחה</span><span class="h c">היעד היום</span>'
+        + '<span>יום אימון</span><span class="v new">' + fmt(t.train.k) + '</span><span class="v">' + fmt(l.train.k) + "</span>"
+        + '<span>יום מנוחה</span><span class="v new">' + fmt(t.rest.k) + '</span><span class="v">' + fmt(l.rest.k) + "</span></div>"
+        + '<p class="macros">לפי הנוסחה, ביום אימון: ' + t.train.p + " חלבון, " + t.train.f + " שומן, " + t.train.c + " פחמימות. ביום מנוחה: " + t.rest.p + " חלבון, " + t.rest.f + " שומן, " + t.rest.c + " פחמימות.</p></div>";
+      var verdict = r.propose
+        ? '<p class="verdict change">הפער ' + gap + "%, אז אני מציע לעדכן את היעדים. שום דבר לא ישתנה בלי אישור שלך.</p>"
+        : '<p class="verdict keep">הפער ' + gap + "%, פחות מ-5%, אז היעדים נשארים כמו שהם. אחרי 4 שבועות מגמת המשקל קובעת, לא הנוסחה.</p>";
+      var dis = S.busy ? " disabled" : "";
+      var buttons = r.propose
+        ? '<button type="button" class="primary" data-act="apply"' + dis + ">לשמור ולעדכן יעדים</button><button type=\"button\" class=\"second\" data-act=\"save\"" + dis + ">לשמור בלי לשנות יעדים</button>"
+        : '<button type="button" class="primary" data-act="save"' + dis + ">לשמור</button>";
+      return { body: '<h1 tabindex="-1">סיכום</h1><p class="hint">לחיצה על שורה מחזירה לשאלה שלה.</p><div class="card">' + rows + "</div>" + estimate + verdict,
+               foot: errBlock() + buttons + '<button type="button" class="link" data-act="leave">לצאת בלי לשמור</button>' };
+    },
+    done: function () {
+      return { body: '<h1 tabindex="-1">סיימנו</h1><p class="prose">' + esc(S.doneText) + "</p>", foot: inTelegram ? '<button type="button" class="primary" data-act="close">סגירה</button>' : "" };
+    }
+  };
+
+  function render() {
+    var name = S.i === INTRO ? "intro" : S.i === REVIEW ? "review" : S.i === DONE ? "done" : QUESTIONS[S.i];
+    var view = SCREENS[name]();
+    screen.innerHTML = view.body;
+    foot.innerHTML = view.foot || "";
+    var question = S.i >= 0 && S.i < REVIEW;
+    top_.hidden = S.i === INTRO || S.i === DONE;
+    document.getElementById("back").hidden = hasBackButton;
+    document.getElementById("count").textContent = question ? "שאלה " + (S.i + 1) + " מתוך " + QUESTIONS.length : "סיכום";
+    document.getElementById("fill").style.width = (question ? ((S.i + 1) / QUESTIONS.length) * 100 : 100) + "%";
+    document.getElementById("bar").setAttribute("aria-valuenow", question ? S.i + 1 : QUESTIONS.length);
+    if (hasBackButton) { if (S.i >= 0 && S.i <= REVIEW) tg.BackButton.show(); else tg.BackButton.hide(); }
+    var h = screen.querySelector("h1");
+    if (h) h.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+    var file = document.getElementById("f-photo");
+    if (file) file.addEventListener("change", onPhoto);
+  }
+
+  /* ---------- the body photo: shrunk here, then one request; nothing is kept in the page ---------- */
+  function shrink(file) {
+    return new Promise(function (ok, no) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * scale);
+        c.height = Math.round(img.naturalHeight * scale);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { if (b) ok(b); else no(new Error("no image")); }, "image/jpeg", 0.85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); no(new Error("no image")); };
+      img.src = url;
+    });
+  }
+  function onPhoto(ev) {
+    var file = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if (!file || S.busy) return;
+    S.busy = true;
+    S.photo = "busy";
+    S.error = "";
+    render();
+    shrink(file).then(function (blob) { return api("POST", "/photo", undefined, blob); }).then(function (j) {
+      S.busy = false;
+      S.photo = "idle";
+      if (j.build) { S.draft.build = j.build; }
+      else { S.error = "לא ראיתי בתמונה מבנה גוף, והיא לא נשמרה. אפשר לנסות תמונה אחרת או לדלג."; }
+      render();
+    }).catch(function (e) {
+      S.busy = false;
+      S.photo = "idle";
+      S.error = e.status === undefined ? "לא הצלחתי לקרוא את הקובץ. נסה תמונה אחרת." : e.status === 403 ? "צריך לפתוח את השאלון מהכפתור בבוט בטלגרם." : "לא הצלחתי לנתח את התמונה, והיא לא נשמרה. אפשר לנסות שוב או לדלג.";
+      render();
+    });
+  }
+
+  /* ---------- presses ---------- */
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest("button");
+    if (!b || b.disabled) return;
+    if (b.id === "back") { back(); return; }
+    var go_ = b.getAttribute("data-go");
+    if (go_ !== null) { S.fromReview = true; go(+go_); return; }
+    var field = b.getAttribute("data-field"), value = b.getAttribute("data-value"), act = b.getAttribute("data-act");
+    if (value !== null) {
+      var changes = {};
+      changes[field] = field === "gym" ? +value : value;
+      screen.querySelectorAll("[aria-pressed]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      save(changes);
+      return;
+    }
+    if (act === "start") { go(0); return; }
+    if (act === "next") { next(); return; }
+    if (act === "body") {
+      var body = { age: val("f-age"), weight: val("f-weight"), height: val("f-height") };
+      if (!body.age || !body.weight || !body.height) { S.error = "צריך למלא גיל, משקל וגובה."; foot.innerHTML = SCREENS.body().foot; return; }
+      save(body);
+      return;
+    }
+    if (act === "text" || act === "skip") {
+      var text = {};
+      text[field] = act === "skip" ? "" : document.getElementById("f-text").value;
+      save(text);
+      return;
+    }
+    if (act === "clear-build") {
+      if (S.busy) return;
+      S.busy = true;
+      api("DELETE", "/photo").then(function () { S.busy = false; delete S.draft.build; S.error = ""; render(); }).catch(fail);
+      return;
+    }
+    if (act === "save") { finish(false); return; }
+    if (act === "apply") { finish(true); return; }
+    if (act === "leave") { leave(); return; }
+    if (act === "close") { tg.close(); }
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter" && ev.target.tagName === "INPUT" && ev.target.id !== "f-photo") {
+      var p = foot.querySelector(".primary");
+      if (p) p.click();
+    }
+  });
+  function val(id) { return document.getElementById(id).value.trim().replace(",", "."); }
+
+  /* ---------- open ---------- */
+  api("GET", "").then(function (j) {
+    S.draft = j.draft || {};
+    S.saved = j.saved;
+    S.lastWeight = j.lastWeight;
+    render();
+  }).catch(function (e) {
+    S.error = e.status === 403 ? "צריך לפתוח את השאלון מהכפתור בבוט בטלגרם." : e.message;
+    render();
+    foot.innerHTML = errBlock();
+  });
+})();
+</script>
+</body>
+</html>

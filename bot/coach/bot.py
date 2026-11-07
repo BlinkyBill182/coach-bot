@@ -28,6 +28,9 @@ TOKEN = os.environ["TELEGRAM_TOKEN"]
 OWNER_ID = int(os.environ.get("OWNER_ID") or 0)
 DB_PATH = os.environ.get("DB_PATH", "coach.db")
 GOOGLE_TOKEN = os.environ.get("GOOGLE_TOKEN", "google_token.json")
+# Service account key and the calendar shared with it (the owner's Gmail address). Either this or GOOGLE_TOKEN.
+GOOGLE_SERVICE_ACCOUNT = os.environ.get("GOOGLE_SERVICE_ACCOUNT", "google_service_account.json")
+GOOGLE_CALENDAR_ID = os.environ.get("GOOGLE_CALENDAR_ID", "")
 WEB_URL = os.environ.get("WEB_URL", "")  # https://<host>/  (Mini App)
 # Google Tasks sync is off since 2026-10-21: the user works with the bot, and the tasks only duplicated its reminders.
 GOOGLE_TASKS = os.environ.get("GOOGLE_TASKS") == "1"
@@ -36,7 +39,7 @@ GOOGLE_TASKS = os.environ.get("GOOGLE_TASKS") == "1"
 AUTO_REMINDERS = os.environ.get("AUTO_REMINDERS", "1") != "0"
 
 store = Store(DB_PATH)
-cal = Calendar(GOOGLE_TOKEN)
+cal = Calendar(GOOGLE_TOKEN, GOOGLE_CALENDAR_ID, GOOGLE_SERVICE_ACCOUNT)
 coach = Coach(store, cal)
 
 
@@ -563,6 +566,10 @@ async def post_init(app: Application) -> None:
         await app.bot.set_chat_menu_button(OWNER_ID, MenuButtonWebApp("מעקב", WebAppInfo(url=WEB_URL)))
     await web.start(store, TOKEN, OWNER_ID, describe=coach.describe_build,
                     notify=lambda text: app.bot.send_message(OWNER_ID, text))
+    if cal.enabled:
+        log.info("%s", await asyncio.to_thread(cal.check))
+    else:
+        log.info("calendar: %s", cal.status())
 
 
 def main() -> None:

@@ -21,8 +21,10 @@ cd <שם-הריפו>
 
 ## 2. השרת
 
-1. קונים VPS ב-Hostinger, ובוחרים את התבנית **Ubuntu 24.04 with Docker**.
-2. ב-hPanel, ב-**Docker Manager**, מתקינים את תבנית **Traefik**. היא נותנת לבוט כתובת HTTPS, ובלעדיה המעקב לא ייפתח בטלגרם.
+לכל בוט שרת משלו. ההעלאה כותבת לתיקייה `/docker/coach` בשרת, ואם כבר רץ שם בוט, הקוד שלו יידרס.
+
+1. קונים VPS ב-Hostinger. במערכת ההפעלה, בלשונית **Applications**, בוחרים את **Docker and Traefik**. זו Ubuntu 24.04 שבה Docker ו-Traefik כבר מותקנים. Traefik נותן לבוט כתובת HTTPS, ובלעדיו המעקב לא ייפתח בטלגרם.
+2. בחרתם **Docker** בלי Traefik? ב-hPanel, ב-**Docker Manager**, ב-**Catalog**, מתקינים את **Traefik**.
 3. מעתיקים מעמוד ה-VPS את שם השרת. הוא נראה כך: `srv123456.hstgr.cloud`.
 4. ב-VPS, בהגדרות, ב-**SSH keys**, מוסיפים את המפתח הציבורי מהמחשב שלכם. אם אין לכם מפתח:
 
@@ -45,14 +47,14 @@ ssh root@srv123456.hstgr.cloud 'docker ps'
 ## 3. הבוט בטלגרם
 
 1. בטלגרם פותחים שיחה עם **@BotFather**.
-2. שולחים `/newbot`, ובוחרים שם ושם משתמש שנגמר ב-`bot`.
-3. שומרים את ה**טוקן** שחוזר, ולא משתפים אותו.
+2. שולחים `/newbot`, או לוחצים **Create a New Bot** באפליקציה של BotFather. בוחרים שם, ושם משתמש שנגמר ב-`bot`.
+3. שומרים את ה**טוקן** שחוזר, ולא משתפים אותו. באפליקציה מעתיקים אותו עם **Copy**.
 
 ## 4. מפתח של Claude
 
-1. נכנסים ל-[console.anthropic.com](https://console.anthropic.com) ומוסיפים אמצעי תשלום.
-2. ב-**API Keys** יוצרים מפתח, נותנים לו שם ובודקים את **Expires**. ברירת המחדל היא 30 יום, ואחריהם המפתח מפסיק לעבוד והבוט מפסיק לענות. בוחרים **Never**, או **Custom** עם תאריך רחוק ותזכורת להחליף. שומרים את המפתח.
-3. מגדירים תקרה חודשית. התשלום לפי שימוש, והבוט רושם הערכה של העלות היומית.
+1. נכנסים ל-[console.anthropic.com](https://console.anthropic.com) ומוסיפים אמצעי תשלום. הכתובת מעבירה היום ל-platform.claude.com.
+2. ב-**API Keys** לוחצים **Create key**. אם נפתח חלון על identity federation, בוחרים **Continue with an API key**. בטופס נותנים למפתח שם ובודקים את **Expires**. ברירת המחדל היא 30 יום, ואחריהם המפתח מפסיק לעבוד והבוט מפסיק לענות. בוחרים **Never**, או **Custom** עם תאריך רחוק ותזכורת להחליף. שומרים את המפתח.
+3. מגדירים תקרה חודשית: **Spending**, אחר כך **Spend limits**, אחר כך **Adjust limit**. התשלום לפי שימוש, והבוט רושם הערכה של העלות היומית.
 
 ## 5. העלאה ראשונה
 
@@ -107,6 +109,48 @@ bash bot/deploy/deploy.sh root@srv123456.hstgr.cloud
 ### יומן Google
 
 בלי היומן הבוט לא מזיז אימונים ולא מתכנן סביב פגישות.
+
+הבוט מתחבר דרך חשבון שירות (service account): כתובת מייל משלו ב-Google, שאתם משתפים איתה את היומן. הוא רואה ומשנה רק את היומן ששיתפתם.
+
+1. נכנסים ל-[Cloud Shell](https://shell.cloud.google.com) עם חשבון Google של היומן. הוא חינמי. בפעם הראשונה לוחצים **Continue**, ובחלון **Authorize Cloud Shell** לוחצים **Authorize**.
+2. מדביקים את הפקודות האלה ולוחצים Enter:
+
+```bash
+P=coach-$(date +%s)
+gcloud projects create $P --name="Coach bot"
+gcloud config set project $P
+gcloud services enable calendar-json.googleapis.com iam.googleapis.com
+gcloud iam service-accounts create coach-bot --display-name="Coach bot"
+sleep 15
+gcloud iam service-accounts keys create google_service_account.json --iam-account=coach-bot@$P.iam.gserviceaccount.com
+cloudshell download google_service_account.json
+echo "Share your calendar with: coach-bot@$P.iam.gserviceaccount.com"
+echo "GOOGLE_CALENDAR_ID=$(gcloud config get-value account 2>/dev/null)"
+```
+
+נפתח חלון **Download File**, ולוחצים **Download**. הקובץ `google_service_account.json` יורד למחשב, ובטרמינל מודפסות שתי שורות: הכתובת של הבוט, ושורה `GOOGLE_CALENDAR_ID=` עם הכתובת שלכם. אחרי שהקובץ ירד, מוחקים את העותק שנשאר ב-Cloud Shell:
+
+```bash
+rm google_service_account.json
+```
+
+3. ב-[Google Calendar](https://calendar.google.com) במחשב: ⚙️ **Settings**, ותחת **Settings for my calendars** בוחרים את היומן. ב-**Shared with** לוחצים **Add people and groups**, ומדביקים את הכתובת של הבוט. ב-**Permissions** בוחרים **Make changes and see all event details**, ולוחצים **Send**.
+4. מתיקיית הריפו במחשב מעבירים את הקובץ:
+
+```bash
+mv ~/Downloads/google_service_account.json bot/
+```
+
+5. מוסיפים ל-`/docker/coach/.env` את השורה `GOOGLE_CALENDAR_ID=` שהודפסה, ומריצים שוב את פקודת ההעלאה. היא מעתיקה את הקובץ לשרת. בסוף ההעלאה, בשורות מהלוג, אמורה להופיע `calendar connected`. אם מופיעה `calendar error`, השורה אומרת מה לבדוק.
+
+שני דברים שכדאי לדעת:
+
+- הקובץ הוא מפתח שלא פג. הוא לא נכנס לגיט, ושמור רק אצלכם ועל השרת. אם הוא דלף, מוחקים את השיתוף ביומן, והמפתח כבר לא רואה כלום.
+- התראות ביומן שייכות לכל משתמש בנפרד, אז הבוט לא קובע התראה ביומן שלכם. אימון שהוא יוצר מקבל את ההתראות הרגילות של היומן, ותזכורת היציאה מגיעה בטלגרם. באירוע עצמו, כיוצר, תופיע הכתובת של הבוט.
+
+#### חשבון Google של עבודה או לימודים
+
+ארגון יכול לחסום מפתחות של חשבון שירות, ואז השלב השני נכשל. במקרה כזה מתחברים בהרשאה רגילה (OAuth):
 
 1. ב-[console.cloud.google.com](https://console.cloud.google.com) יוצרים פרויקט ומפעילים את **Google Calendar API**.
 2. ב-**OAuth consent screen** בוחרים External, ואז מעבירים את ה-Publishing status ל-**In production**. אחרת ההרשאה פגה כל 7 ימים.

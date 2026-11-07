@@ -14,10 +14,10 @@ A personal coach bot for one owner. Before answering anything about food, weight
 ## Rules
 - Lasting changes to targets, the week, the exercise plan or the meal template go through preview first, then the owner's yes in a later turn (`ToolRunner._gate`).
 - Live values are in the server database (`config/program`, `config/exercises`, `config/schedule`) and win over numbers in the skill.
-- Secrets live only in `/docker/coach/.env` on the server. Never commit or print `.env`, `credentials.json` or `google_token.json`.
+- Secrets live only in `/docker/coach/.env` on the server. Never commit or print `.env`, `credentials.json`, `google_token.json` or `google_service_account.json`.
 - Health data stays on the server. Never add logs, exports or backups to the repo.
 - A push to `main` deploys once the GitHub secrets are set, so confirm with the owner before pushing.
-- Add-ons are off until configured: Wolt (`WOLT_ENABLED=1`), drive times (`ETA_KEY`), voice (`ELEVENLABS_API_KEY`), calendar (`google_token.json`).
+- Add-ons are off until configured: Wolt (`WOLT_ENABLED=1`), drive times (`ETA_KEY`), voice (`ELEVENLABS_API_KEY`), calendar (`google_service_account.json` with `GOOGLE_CALENDAR_ID`, or `google_token.json`).
 
 ## Commands
 - Tests, from `bot/`: `python -m pytest -q` (needs `pip install -r requirements.txt pytest`).

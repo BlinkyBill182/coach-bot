@@ -1,11 +1,15 @@
 """Google Calendar access: read a day's events and move the gym event.
 
-Uses an OAuth token created once with scripts/auth_google.py. Without the
-token file the calendar is simply off and the bot plans from the template.
+Two ways to connect; either one turns the calendar on:
+- A service account: its key file (google_service_account.json) plus GOOGLE_CALENDAR_ID, the
+  calendar the owner shared with the service account's email (usually their Gmail address).
+- An OAuth token created once with scripts/auth_google.py (google_token.json).
+Without either the calendar is simply off and the bot plans from the template.
 """
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 import os
 import re
@@ -17,22 +21,72 @@ from .personal import GYM_NAME
 
 log = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/tasks"]
+SERVICE_SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 TASK_LIST = "מאמן"
 TAG = re.compile(r"\[coach (\d{4}-\d{2}-\d{2}) #(\d+)\]")
 GYM_TITLE = "חדר כושר"
 
 
 class Calendar:
-    def __init__(self, token_path: str, calendar_id: str = "primary"):
+    def __init__(self, token_path: str, calendar_id: str = "primary", service_account_path: str = ""):
         self.token_path = token_path
-        self.calendar_id = calendar_id
+        self.calendar_id = calendar_id or "primary"
+        self.service_account_path = service_account_path
         self._svc = None
 
     @property
+    def uses_service_account(self) -> bool:
+        # "primary" would be the service account's own calendar, which is empty: it needs the owner's calendar id.
+        return (bool(self.service_account_path) and os.path.exists(self.service_account_path)
+                and self.calendar_id != "primary")
+
+    @property
     def enabled(self) -> bool:
-        return os.path.exists(self.token_path)
+        return self.uses_service_account or os.path.exists(self.token_path)
+
+    def service_account_email(self) -> str:
+        try:
+            with open(self.service_account_path) as f:
+                return json.load(f).get("client_email", "")
+        except (OSError, ValueError, TypeError):
+            return ""
+
+    def status(self) -> str:
+        """How the calendar is connected, for the startup log."""
+        if self.uses_service_account:
+            return f"service account {self.service_account_email()} on calendar {self.calendar_id}"
+        if self.service_account_path and os.path.exists(self.service_account_path):
+            if os.path.exists(self.token_path):
+                return "OAuth token (the service account key is ignored: GOOGLE_CALENDAR_ID is empty)"
+            return "off: the service account key is there, but GOOGLE_CALENDAR_ID is empty"
+        if os.path.exists(self.token_path):
+            return "OAuth token"
+        return "off"
+
+    def check(self) -> str:
+        """Read today's events once, so a wrong setup shows in the log right after a deploy."""
+        try:
+            n = len(self.events_on(domain.today()))
+            return f"calendar connected ({self.status()}): {n} events today"
+        except Exception as e:  # noqa: BLE001 - any failure is reported, the bot keeps running
+            hint = ""
+            if self.uses_service_account:
+                hint = (f" Share the calendar {self.calendar_id} with {self.service_account_email()}"
+                        " and pick 'Make changes to events'.")
+            return f"calendar error ({self.status()}): {e}.{hint}"
+
+    def _reminders(self, leave_minutes: int) -> dict:
+        # Reminders belong to the signed-in user. A service account's popup would never reach the owner,
+        # so its events keep the owner's default reminders; the bot's own Telegram reminder still goes out.
+        if self.uses_service_account:
+            return {}
+        return {"reminders": {"useDefault": False, "overrides": [{"method": "popup", "minutes": leave_minutes}]}}
 
     def _creds(self):
+        if self.uses_service_account:
+            from google.oauth2 import service_account
+            return service_account.Credentials.from_service_account_file(self.service_account_path,
+                                                                         scopes=SERVICE_SCOPES)
         from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
 
@@ -57,10 +111,9 @@ class Calendar:
 
     @property
     def tasks_enabled(self) -> bool:
-        if not self.enabled:
+        if not self.enabled or self.uses_service_account:  # Google Tasks needs the owner's own sign-in
             return False
         try:
-            import json
             with open(self.token_path) as f:
                 return "https://www.googleapis.com/auth/tasks" in (json.load(f).get("scopes") or [])
         except (OSError, ValueError):
@@ -189,7 +242,7 @@ class Calendar:
             "start": {"dateTime": start.isoformat(), "timeZone": "Asia/Jerusalem"},
             "end": {"dateTime": end.isoformat(), "timeZone": "Asia/Jerusalem"},
             "description": "🏋️ " + title_line + ("\n" + "\n".join(workout_lines) if workout_lines else "") + footer,
-            "reminders": {"useDefault": False, "overrides": [{"method": "popup", "minutes": leave_minutes}]},
+            **self._reminders(leave_minutes),
         }
         self._service().events().patch(calendarId=self.calendar_id, eventId=event["id"], body=body).execute()
         log.info("moved gym event %s to %s", event["id"], start.isoformat())
@@ -203,7 +256,7 @@ class Calendar:
             "summary": f"💪🏾 {GYM_TITLE}", "location": location, "description": "🏋️ " + title_line,
             "start": {"dateTime": start.isoformat(), "timeZone": "Asia/Jerusalem"},
             "end": {"dateTime": end.isoformat(), "timeZone": "Asia/Jerusalem"},
-            "reminders": {"useDefault": False, "overrides": [{"method": "popup", "minutes": leave_minutes}]},
+            **self._reminders(leave_minutes),
         }
         ev = self._service().events().insert(calendarId=self.calendar_id, body=body).execute()
         log.info("created gym event %s on %s", ev["id"], start.isoformat())

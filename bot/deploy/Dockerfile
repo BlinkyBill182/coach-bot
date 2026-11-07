@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED=1 \
     TRACKER_PATH=/app/tracker.html \
     DB_PATH=/data/coach.db \
     GOOGLE_TOKEN=/data/google_token.json \
+    GOOGLE_SERVICE_ACCOUNT=/data/google_service_account.json \
     WEB_HOST=0.0.0.0 \
     PORT=8080
 RUN useradd --uid 1000 --no-create-home coach

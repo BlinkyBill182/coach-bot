@@ -22,7 +22,7 @@ fi
 
 if [ ! -f .env ]; then
   cp src/bot/.env.example .env
-  sed -i '/^DB_PATH=\|^GOOGLE_TOKEN=\|^SKILL_PATH=\|^TRACKER_PATH=\|^PORT=/d' .env
+  sed -i '/^DB_PATH=\|^GOOGLE_TOKEN=\|^GOOGLE_SERVICE_ACCOUNT=\|^SKILL_PATH=\|^TRACKER_PATH=\|^PORT=/d' .env
   sed -i "s|^WEB_URL=.*|WEB_URL=https://$DOMAIN/|" .env
   sed -i "s|^WEB_KEY=.*|WEB_KEY=$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9')|" .env
   printf '\n# Docker / Traefik (detected by server-setup.sh)\nDOMAIN=%s\nTRAEFIK_ENTRYPOINT=%s\nTRAEFIK_CERTRESOLVER=%s\n' "$DOMAIN" "$EP" "$RES" >> .env

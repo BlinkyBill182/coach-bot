@@ -4,4 +4,5 @@ __pycache__/
 .env
 credentials.json
 google_token.json
+google_service_account.json
 seed/

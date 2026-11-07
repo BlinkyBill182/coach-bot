@@ -17,14 +17,16 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"   # the repo folder
 
 ssh "$HOST" 'mkdir -p /docker/coach/src/bot /docker/coach/src/.claude/skills/muscle-coach /docker/coach/data'
 rsync -az --delete --exclude .venv --exclude __pycache__ --exclude .pytest_cache --exclude seed --exclude '*.db' \
-  --exclude .env --exclude credentials.json --exclude google_token.json "$ROOT/bot/" "$HOST:/docker/coach/src/bot/"
+  --exclude .env --exclude credentials.json --exclude google_token.json --exclude google_service_account.json "$ROOT/bot/" "$HOST:/docker/coach/src/bot/"
 rsync -az --delete "$ROOT/.claude/skills/muscle-coach/" "$HOST:/docker/coach/src/.claude/skills/muscle-coach/"
 rsync -az "$ROOT/tracker.html" "$HOST:/docker/coach/src/tracker.html"
 rsync -az "$ROOT/bot/deploy/compose.yaml" "$HOST:/docker/coach/compose.yaml"
-if [ -f "$ROOT/bot/google_token.json" ]; then
-  rsync -az "$ROOT/bot/google_token.json" "$HOST:/docker/coach/data/google_token.json"
-  ssh "$HOST" 'chown 1000:1000 /docker/coach/data/google_token.json && chmod 600 /docker/coach/data/google_token.json'
-fi
+for f in google_token.json google_service_account.json; do   # Google Calendar access, if you set it up
+  if [ -f "$ROOT/bot/$f" ]; then
+    rsync -az "$ROOT/bot/$f" "$HOST:/docker/coach/data/$f"
+    ssh "$HOST" "chown 1000:1000 /docker/coach/data/$f && chmod 600 /docker/coach/data/$f"
+  fi
+done
 if [ -n "$FIRST" ]; then
   ssh "$HOST" "bash /docker/coach/src/bot/deploy/server-setup.sh '$FIRST'"
 fi

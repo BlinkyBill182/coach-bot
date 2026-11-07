@@ -23,26 +23,33 @@ cd <שם-הריפו>
 
 לכל בוט שרת משלו. ההעלאה כותבת לתיקייה `/docker/coach` בשרת, ואם כבר רץ שם בוט, הקוד שלו יידרס.
 
-1. קונים VPS ב-Hostinger. במערכת ההפעלה, בלשונית **Applications**, בוחרים את **Docker and Traefik**. זו Ubuntu 24.04 שבה Docker ו-Traefik כבר מותקנים. Traefik נותן לבוט כתובת HTTPS, ובלעדיו המעקב לא ייפתח בטלגרם.
-2. בחרתם **Docker** בלי Traefik? ב-hPanel, ב-**Docker Manager**, ב-**Catalog**, מתקינים את **Traefik**.
-3. מעתיקים מעמוד ה-VPS את שם השרת. הוא נראה כך: `srv123456.hstgr.cloud`.
-4. ב-VPS, בהגדרות, ב-**SSH keys**, מוסיפים את המפתח הציבורי מהמחשב שלכם. אם אין לכם מפתח:
+1. לפני הקנייה מכינים במחשב מפתח SSH. אם אין לכם מפתח:
 
 ```bash
 ssh-keygen -t ed25519
 ```
 
+מציגים את המפתח הציבורי ומעתיקים את השורה שהודפסה:
+
 ```bash
 cat ~/.ssh/id_ed25519.pub
 ```
 
-מדביקים את השורה שהודפסה. בודקים שההתחברות עובדת:
+2. קונים VPS ב-Hostinger. בהזמנה, ב-**Choose what to install**, בלשונית **Applications**, בוחרים את **Docker and Traefik** ולוחצים **Select**. זו Ubuntu 24.04 שבה Docker ו-Traefik כבר מותקנים. Traefik נותן לבוט כתובת HTTPS, ובלעדיו המעקב לא ייפתח בטלגרם.
+3. ב-**Secure your VPS access** בוחרים סיסמה ל-root, וב-**Add SSH key** מדביקים את המפתח הציבורי. ב-**Additional features** אפשר להשאיר הכל לא מסומן. בתוכניות, **KVM 1** מספיק: בבדיקה הבוט השתמש בכ-100 MB מתוך 4 GB. ההתקנה לוקחת כמה דקות.
+4. מסך הסיום מציג רק `ssh root@` עם IP. את שם השרת מעתיקים מרשימת ה-VPS ב-hPanel. הוא נראה כך: `srv123456.hstgr.cloud`.
+5. בודקים שההתחברות עובדת:
 
 ```bash
 ssh root@srv123456.hstgr.cloud 'docker ps'
 ```
 
-ברשימה אמורה להופיע שורה עם `traefik`.
+בפעם הראשונה `ssh` שואל `Are you sure you want to continue connecting`, ועונים `yes`. ברשימה אמורה להופיע שורה עם `traefik`.
+
+בשרת שכבר יש לכם:
+
+- אין בו Traefik? ב-hPanel, ב-**Docker Manager**, ב-**Catalog**, מתקינים את **Traefik**.
+- לא הוספתם מפתח בקנייה? ב-VPS, ב-**Settings**, ב-**SSH keys**, מוסיפים את המפתח הציבורי.
 
 ## 3. הבוט בטלגרם
 
@@ -100,7 +107,7 @@ bash bot/deploy/deploy.sh root@srv123456.hstgr.cloud
 
 ## 8. השאלון
 
-שולחים שוב `/start`. נפתח כפתור לשאלון של 9 שאלות. ממנו הבוט מעריך כמה אתם שורפים ומציע יעדים, ומחליף אותם רק אחרי שתאשרו.
+שולחים שוב `/start`. נפתח כפתור לשאלון של 9 שאלות. ממנו הבוט מעריך כמה אתם שורפים ומציע יעדים. הם מתחלפים רק כשלוחצים **לשמור ולעדכן יעדים**, והבוט מאשר בטלגרם.
 
 התוכנית שעולה עם ההתקנה היא נקודת התחלה: 5 אימונים בשבוע ותבנית ארוחות (`bot/starter`). לשנות אותן אומרים לבוט, למשל "אני מתאמן רק בימים א׳, ג׳ ו-ה׳".
 
@@ -112,7 +119,7 @@ bash bot/deploy/deploy.sh root@srv123456.hstgr.cloud
 
 הבוט מתחבר דרך חשבון שירות (service account): כתובת מייל משלו ב-Google, שאתם משתפים איתה את היומן. הוא רואה ומשנה רק את היומן ששיתפתם.
 
-1. נכנסים ל-[Cloud Shell](https://shell.cloud.google.com) עם חשבון Google של היומן. הוא חינמי. בפעם הראשונה לוחצים **Continue**, ובחלון **Authorize Cloud Shell** לוחצים **Authorize**.
+1. נכנסים ל-[Cloud Shell](https://shell.cloud.google.com) עם חשבון Google של היומן. הוא חינמי. בפעם הראשונה לוחצים **Continue**. החלון **Authorize Cloud Shell** חוזר בכל פעם שפותחים את Cloud Shell, ולוחצים בו **Authorize**.
 2. מדביקים את הפקודות האלה ולוחצים Enter:
 
 ```bash
@@ -128,20 +135,20 @@ echo "Share your calendar with: coach-bot@$P.iam.gserviceaccount.com"
 echo "GOOGLE_CALENDAR_ID=$(gcloud config get-value account 2>/dev/null)"
 ```
 
-נפתח חלון **Download File**, ולוחצים **Download**. הקובץ `google_service_account.json` יורד למחשב, ובטרמינל מודפסות שתי שורות: הכתובת של הבוט, ושורה `GOOGLE_CALENDAR_ID=` עם הכתובת שלכם. אחרי שהקובץ ירד, מוחקים את העותק שנשאר ב-Cloud Shell:
+השורות שהדבקתם והפלט מתערבבים על המסך, וזה תקין. עוד לפני שהפקודות מסתיימות נפתח חלון **Download File**, ולוחצים **Download**. הקובץ `google_service_account.json` יורד למחשב. בסוף מודפסות שתי השורות שחשובות: הכתובת של הבוט, ושורה `GOOGLE_CALENDAR_ID=` עם הכתובת שלכם. אחרי שהקובץ ירד, מוחקים את העותק שנשאר ב-Cloud Shell:
 
 ```bash
 rm google_service_account.json
 ```
 
 3. ב-[Google Calendar](https://calendar.google.com) במחשב: ⚙️ **Settings**, ותחת **Settings for my calendars** בוחרים את היומן. ב-**Shared with** לוחצים **Add people and groups**, ומדביקים את הכתובת של הבוט. ב-**Permissions** בוחרים **Make changes and see all event details**, ולוחצים **Send**.
-4. מתיקיית הריפו במחשב מעבירים את הקובץ:
+4. מתיקיית הריפו במחשב מעבירים את הקובץ. אם כבר היה בהורדות קובץ בשם הזה, הדפדפן שומר את החדש בשם אחר, למשל `google_service_account (1).json`, ולכן הפקודה לוקחת את החדש ביותר:
 
 ```bash
-mv ~/Downloads/google_service_account.json bot/
+mv "$(ls -t ~/Downloads/google_service_account*.json | head -1)" bot/google_service_account.json
 ```
 
-5. מוסיפים ל-`/docker/coach/.env` את השורה `GOOGLE_CALENDAR_ID=` שהודפסה, ומריצים שוב את פקודת ההעלאה. היא מעתיקה את הקובץ לשרת. בסוף ההעלאה, בשורות מהלוג, אמורה להופיע `calendar connected`. אם מופיעה `calendar error`, השורה אומרת מה לבדוק.
+5. מוסיפים ל-`/docker/coach/.env` את השורה `GOOGLE_CALENDAR_ID=` שהודפסה. היא מתאימה ליומן הראשי. שיתפתם יומן אחר? אחרי ה-`=` כותבים את ה-**Calendar ID** שלו: ב-Settings, ביומן, ב-**Integrate calendar**. אחר כך מריצים שוב את פקודת ההעלאה. היא מעתיקה את הקובץ לשרת. בסוף ההעלאה, בשורות מהלוג, אמורה להופיע `calendar connected`. אם מופיעה `calendar error`, השורה אומרת מה לבדוק.
 
 שני דברים שכדאי לדעת:
 
